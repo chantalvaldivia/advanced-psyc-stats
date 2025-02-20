@@ -263,14 +263,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>gbbo_age <span class="ot">&lt;-</span> gbbo_filter <span class="sc">%&gt;%</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Age, Technical.Rank) <span class="sc">%&gt;%</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">count =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Technical.Rank) <span class="sc">%&gt;%</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Age) <span class="sc">%&gt;%</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">percentage =</span> count <span class="sc">/</span> <span class="fu">sum</span>(count) <span class="sc">*</span> <span class="dv">100</span>)</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot for Age</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(gbbo_age, <span class="fu">aes</span>(<span class="at">x =</span> Technical.Rank, <span class="at">y =</span> percentage, <span class="at">fill =</span> Age)) <span class="sc">+</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(gbbo_age, <span class="fu">aes</span>(<span class="at">x =</span> Age, <span class="at">y =</span> percentage, <span class="at">fill =</span> Technical.Rank)) <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Percentage of Bakers by Rank and Age"</span>,</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"TechnicalRank"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Age"</span>,</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Percentage"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
@@ -284,54 +284,71 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="ordinal-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="ordinal-analysis">Ordinal Analysis</h2>
-<ul>
-<li><p>If you haven’t already, convert the outcome variable to an ordered factor. What does the order here represent?</p>
-<ul>
-<li><p>Order is inverse where 1 is better than 2 which is better than 3</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gbbo_filter<span class="sc">$</span>Technical.Rank <span class="ot">&lt;-</span> <span class="fu">factor</span>(gbbo_filter<span class="sc">$</span>Technical.Rank, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"3"</span>, <span class="st">"2"</span>, <span class="st">"1"</span>), <span class="at">ordered =</span> <span class="cn">TRUE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gbbo_filter <span class="ot">&lt;-</span> gbbo_filter <span class="sc">%&gt;%</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Technical.Rank =</span> <span class="fu">factor</span>(Technical.Rank, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), <span class="at">ordered =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">Gender =</span> <span class="fu">factor</span>(Gender))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-</div></li>
-</ul></li>
-<li><p>Convert input variables to categorical factors as appropriate.</p>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(gbbo_filter)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>'data.frame':   309 obs. of  3 variables:
- $ Gender        : chr  "F" "M" "M" "F" ...
- $ Age           : int  30 31 24 45 25 37 24 37 31 24 ...
- $ Technical.Rank: Ord.factor w/ 3 levels "3"&lt;"2"&lt;"1": 2 1 3 2 3 1 3 1 2 1 ...</code></pre>
 </div>
+<ul>
+<li><p>Convert input variables to categorical factors as appropriate (done in code above)</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## done in code above</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div></li>
 <li><p>Run a ordinal logistic regression model against all relevant input variables. Interpret the effects for <code>Gender</code>, <code>Age</code> and <code>Gender*Age</code> (even if they are non-significant).</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">polr</span>(Technical.Rank <span class="sc">~</span> Gender <span class="sc">+</span> Age <span class="sc">+</span> Gender<span class="sc">*</span>Age, <span class="at">data =</span> gbbo_filter, <span class="at">Hess=</span><span class="cn">TRUE</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="do">## view a summary of the model</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>m <span class="sc">%&gt;%</span> </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">clm</span>(Technical.Rank <span class="sc">~</span> Gender <span class="sc">+</span> Age <span class="sc">+</span> Gender<span class="sc">*</span>Age, <span class="at">data =</span> gbbo_filter)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="do">## view a summary of the model</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>m <span class="sc">%&gt;%</span> </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 5
-  term        estimate std.error statistic coef.type  
-  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;      
-1 GenderM      1.15       0.673     1.71   coefficient
-2 Age          0.0231     0.0125    1.85   coefficient
-3 GenderM:Age -0.0388     0.0185   -2.09   coefficient
-4 3|2         -0.00495    0.452    -0.0109 scale      
-5 2|1          1.42       0.460     3.08   scale      </code></pre>
+<pre><code># A tibble: 5 × 6
+  term        estimate std.error statistic p.value coef.type
+  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    
+1 1|2         -1.42       0.460    -3.08   0.00205 intercept
+2 2|3          0.00494    0.452     0.0109 0.991   intercept
+3 GenderM     -1.15       0.673    -1.71   0.0876  location 
+4 Age         -0.0231     0.0125   -1.85   0.0636  location 
+5 GenderM:Age  0.0388     0.0185    2.09   0.0363  location </code></pre>
 </div>
 </div></li>
 <li><p>Test if the interaction is warranted</p></li>
 </ul>
 <p>#Hint: You need to create two models with clm(); one with interaction and one without. #Then you compare them using the anova test using anova()</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">clm</span>(Technical.Rank <span class="sc">~</span> Gender <span class="sc">*</span> Age, <span class="at">data =</span> gbbo_filter)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>m0 <span class="ot">&lt;-</span> <span class="fu">clm</span>(Technical.Rank <span class="sc">~</span> Gender <span class="sc">+</span> Age, <span class="at">data =</span> gbbo_filter)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare the two models using ANOVA</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>comparing <span class="ot">&lt;-</span> <span class="fu">anova</span>(m, m0)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>comparing <span class="sc">%&gt;%</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 13
+  column       n     mean     sd   median  trimmed   mad      min      max range
+  &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
+1 no.par       2  4.5 e+0  0.707  4.5 e+0  4.5 e+0  0.5   4   e+0  5   e+0  1   
+2 AIC          2  6.85e+2  1.72   6.85e+2  6.85e+2  1.22  6.83e+2  6.86e+2  2.44
+3 logLik       2 -3.38e+2  1.57  -3.38e+2 -3.38e+2  1.11 -3.39e+2 -3.37e+2  2.22
+4 LR.stat      1  4.44e+0 NA      4.44e+0  4.44e+0  0     4.44e+0  4.44e+0  0   
+5 df           1  1   e+0 NA      1   e+0  1   e+0  0     1   e+0  1   e+0  0   
+6 Pr(&gt;Chi…     1  3.52e-2 NA      3.52e-2  3.52e-2  0     3.52e-2  3.52e-2  0   
+# ℹ 3 more variables: skew &lt;dbl&gt;, kurtosis &lt;dbl&gt;, se &lt;dbl&gt;</code></pre>
+</div>
+</div>
 <ul>
 <li><p>Use <code>ggemmeans</code> to create a figure showing the interaction between <code>Gender</code> and <code>Age</code> as a function of rank. Plot predicted probabilities from the model.</p></li>
 </ul>
@@ -340,10 +357,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ols_clm <span class="ot">=</span> MASS<span class="sc">::</span><span class="fu">polr</span>(Technical.Rank<span class="sc">~</span>Gender<span class="sc">*</span>Age, <span class="at">data=</span>gbbo_filter)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggeffect</span>(ols_clm, <span class="fu">c</span>(<span class="st">"Age[all]"</span>, <span class="st">"Gender"</span>), <span class="at">latent=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ols_clm <span class="ot">=</span> MASS<span class="sc">::</span><span class="fu">polr</span>(Technical.Rank<span class="sc">~</span>Gender<span class="sc">*</span>Age, <span class="at">data=</span>gbbo_filter)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggeffect</span>(ols_clm, <span class="fu">c</span>(<span class="st">"Age[all]"</span>, <span class="st">"Gender"</span>), <span class="at">latent=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -358,7 +375,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">brant.test</span>(ols_clm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">brant.test</span>(ols_clm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -378,7 +395,7 @@ H0: Proportional odds assumption holds</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>  ols2_brm <span class="ot">=</span> <span class="fu">brm</span>(Technical.Rank <span class="sc">~</span>  Gender<span class="sc">*</span>Age, <span class="at">data=</span>gbbo_filter, <span class="at">family =</span> cumulative, <span class="at">cores =</span> <span class="dv">4</span>,<span class="at">chains =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>  ols2_brm <span class="ot">=</span> <span class="fu">brm</span>(Technical.Rank <span class="sc">~</span>  Gender<span class="sc">*</span>Age, <span class="at">data=</span>gbbo_filter, <span class="at">family =</span> cumulative, <span class="at">cores =</span> <span class="dv">4</span>,<span class="at">chains =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <ul>
@@ -386,7 +403,7 @@ H0: Proportional odds assumption holds</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">conditional_effects</span>(ols2_brm, <span class="at">categorical =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">conditional_effects</span>(ols2_brm, <span class="at">categorical =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -408,7 +425,7 @@ H0: Proportional odds assumption holds</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_predictions</span>(ols2_brm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_predictions</span>(ols2_brm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -418,6 +435,7 @@ H0: Proportional odds assumption holds</code></pre>
 </div>
 </div>
 </div>
+<p>Yeah I would say the model fit is pretty great</p>
 
 
 </section>
