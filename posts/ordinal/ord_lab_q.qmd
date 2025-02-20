@@ -110,35 +110,32 @@ ggplot(gbbo_gender, aes(x = Technical.Rank, y = percentage, fill = Gender)) +
 gbbo_age <- gbbo_filter %>%
   group_by(Age, Technical.Rank) %>%
   summarise(count = n(), .groups = "drop") %>%
-  group_by(Technical.Rank) %>%
+  group_by(Age) %>%
   mutate(percentage = count / sum(count) * 100)
 
 # Plot for Age
-ggplot(gbbo_age, aes(x = Technical.Rank, y = percentage, fill = Age)) +
-  geom_bar(stat = "identity") +
+ggplot(gbbo_age, aes(x = Age, y = percentage, fill = Technical.Rank)) +
+  geom_histogram(stat = "identity") +
   labs(title = "Percentage of Bakers by Rank and Age",
-       x = "TechnicalRank",
+       x = "Age",
        y = "Percentage")
 
 ```
 
 ## Ordinal Analysis
 
--   If you haven't already, convert the outcome variable to an ordered factor.
-    What does the order here represent?
+```{r}
+gbbo_filter <- gbbo_filter %>% 
+    mutate(Technical.Rank = factor(Technical.Rank, levels = c(1, 2, 3), ordered = TRUE),
+           Gender = factor(Gender))
+```
 
-    -   Order is inverse where 1 is better than 2 which is better than 3
-
-        ```{r}
-
-        gbbo_filter$Technical.Rank <- factor(gbbo_filter$Technical.Rank, levels = c("3", "2", "1"), ordered = TRUE) 
-
-        ```
-
--   Convert input variables to categorical factors as appropriate.
+-   Convert input variables to categorical factors as appropriate (done in code above)
 
     ```{r}
-    str(gbbo_filter)
+
+    ## done in code above
+
     ```
 
 -   Run a ordinal logistic regression model against all relevant input variables.
@@ -146,7 +143,7 @@ ggplot(gbbo_age, aes(x = Technical.Rank, y = percentage, fill = Age)) +
 
     ```{r}
 
-    m <- MASS::polr(Technical.Rank ~ Gender + Age + Gender*Age, data = gbbo_filter, Hess=TRUE)
+    m <- clm(Technical.Rank ~ Gender + Age + Gender*Age, data = gbbo_filter)
 
     ## view a summary of the model
     m %>% 
@@ -160,6 +157,14 @@ ggplot(gbbo_age, aes(x = Technical.Rank, y = percentage, fill = Age)) +
 
 ```{r}
 
+m <- clm(Technical.Rank ~ Gender * Age, data = gbbo_filter)
+
+m0 <- clm(Technical.Rank ~ Gender + Age, data = gbbo_filter)
+
+# Compare the two models using ANOVA
+comparing <- anova(m, m0)
+comparing %>%
+  tidy()
 ```
 
 -   Use `ggemmeans` to create a figure showing the interaction between `Gender` and `Age` as a function of rank.
@@ -213,3 +218,5 @@ ggeffect(ols_clm, c("Age[all]", "Gender"), latent=TRUE) %>% plot()
 ```{r}
 check_predictions(ols2_brm)
 ```
+
+Yeah I would say the model fit is pretty great
