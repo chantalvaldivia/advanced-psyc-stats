@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "advanced-psyc-stats",
     "section": "",
-    "text": "Lab: Logistic Regression\n\n\nPrinceton University\n\n\n\n\n\n\n\n\nChantal Valdivia-Moreno\n\n\n\n\n\n\nNo matching items"
+    "text": "Lab: Logistic Regression\n\n\nPrinceton University\n\n\n\n\n\n\n\n\nChantal Valdivia-Moreno\n\n\n\n\n\n\n\n\n\n\n\n\nOrdinal Regression Lab Answers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/Lab-Logistic-Q.html",
@@ -89,5 +89,47 @@
     "title": "Lab: Logistic Regression",
     "section": "Conclusion",
     "text": "Conclusion\nPolitical views are the best predictor of mass transportation spending opinions, given the large reduction in deviance. Age and sex perform almost equally, but sei10 is not all that helpful\n\n\n\n\nDf\nDeviance\nResid. Df\nResid. Dev\nPr(&gt;Chi)\n\n\n\n\nNULL\nNA\nNA\n2589\n3581.340\nNA\n\n\npolviews\n6\n64.575385\n2583\n3516.765\n0.0000000\n\n\nage\n1\n12.999334\n2582\n3503.766\n0.0003116\n\n\nsex\n1\n12.946009\n2581\n3490.820\n0.0003206\n\n\nsei10\n1\n8.051857\n2580\n3482.768\n0.0045457\n\n\n\nTable 1\n\n\n\n\n\nFigure 1: Effect of Sex on Satisfaction with Mass Transportation\n\n\n\n\n\n\n\n\n\nFigure 2: Effect of SES on Satisfaction with Mass Transportation\n\n\n\n\n\n\n\n\n\nFigure 3: Effect of Political Views on Satisfaction with Mass Transportation"
+  },
+  {
+    "objectID": "posts/ord_lab_q.html",
+    "href": "posts/ord_lab_q.html",
+    "title": "Ordinal Regression Lab Answers",
+    "section": "",
+    "text": "If you are fitting a model, display the model output in a neatly formatted table. (The tidy and kable functions can help!)\nIf you are creating a plot, use clear labels for all axes, titles, etc.\nIf you are using Github, don’t forget to commit and push your work to to it regularly, at least after each exercise. Write short and informative commit messages. Else, if you are submitting on Canvas, make sure that the version you submit is the latest, and that it runs/knits without any errors.\nWhen you’re done, we should be able to knit the final version of the QMD in your GitHub as a HTML."
+  },
+  {
+    "objectID": "posts/ord_lab_q.html#instructions",
+    "href": "posts/ord_lab_q.html#instructions",
+    "title": "Ordinal Regression Lab Answers",
+    "section": "",
+    "text": "If you are fitting a model, display the model output in a neatly formatted table. (The tidy and kable functions can help!)\nIf you are creating a plot, use clear labels for all axes, titles, etc.\nIf you are using Github, don’t forget to commit and push your work to to it regularly, at least after each exercise. Write short and informative commit messages. Else, if you are submitting on Canvas, make sure that the version you submit is the latest, and that it runs/knits without any errors.\nWhen you’re done, we should be able to knit the final version of the QMD in your GitHub as a HTML."
+  },
+  {
+    "objectID": "posts/ord_lab_q.html#load-packages",
+    "href": "posts/ord_lab_q.html#load-packages",
+    "title": "Ordinal Regression Lab Answers",
+    "section": "Load packages:",
+    "text": "Load packages:\n\n\nCode\nlibrary(tidyverse)\nlibrary(broom)\nlibrary(performance)\nlibrary(ordinal) #clm\nlibrary(car) # anova\nlibrary(ggeffects) #  viz\nlibrary(gofcat) # brant\nlibrary(brms)\nlibrary(emmeans) # contrasts\nlibrary(knitr)"
+  },
+  {
+    "objectID": "posts/ord_lab_q.html#load-data",
+    "href": "posts/ord_lab_q.html#load-data",
+    "title": "Ordinal Regression Lab Answers",
+    "section": "Load data",
+    "text": "Load data\n\nMake sure only the top 3 ranks are being used. For some reason, there are missing ranks (my guess is they did not announce rank on TV)\n\n\n\nCode\n# Load data\ngbbo &lt;- read.csv(\"https://raw.githubusercontent.com/suyoghc/PSY-504_Spring-2025/refs/heads/main/Ordinal%20Regression/data/GBBO.csv\")\n\n# Enter code to filter. Think about the data type that would be relevant for Rank\ngbbo_filter &lt;- gbbo %&gt;% \n  filter(Technical.Rank &lt;= 3)"
+  },
+  {
+    "objectID": "posts/ord_lab_q.html#explore",
+    "href": "posts/ord_lab_q.html#explore",
+    "title": "Ordinal Regression Lab Answers",
+    "section": "Explore",
+    "text": "Explore\nPlot two figures showing the percentage of bakers in each rank— create one for Gender and Age\n\n\nCode\n# Percentage of bakers in each rank (gender)\ngbbo_gender &lt;- gbbo_filter %&gt;%\n  group_by(Gender, Technical.Rank) %&gt;%\n  summarise(count = n(), .groups = \"drop\") %&gt;%\n  group_by(Gender) %&gt;%\n  mutate(percentage = count / sum(count) * 100)\n\n# Plot for Gender\nggplot(gbbo_gender, aes(x = Technical.Rank, y = percentage, fill = Gender)) +\n  geom_bar(stat = \"identity\") +\n  labs(title = \"Percentage of Bakers by Rank and Gender\",\n       x = \"Technical Rank\",\n       y = \"Percentage\")\n\n\n\n\n\n\n\n\n\n\n\nCode\n# Percentage of bakers in each rank (age)\ngbbo_age &lt;- gbbo_filter %&gt;%\n  group_by(Age, Technical.Rank) %&gt;%\n  summarise(count = n(), .groups = \"drop\") %&gt;%\n  group_by(Technical.Rank) %&gt;%\n  mutate(percentage = count / sum(count) * 100)\n\n# Plot for Age\nggplot(gbbo_age, aes(x = Technical.Rank, y = percentage, fill = Age)) +\n  geom_bar(stat = \"identity\") +\n  labs(title = \"Percentage of Bakers by Rank and Age\",\n       x = \"TechnicalRank\",\n       y = \"Percentage\")"
+  },
+  {
+    "objectID": "posts/ord_lab_q.html#ordinal-analysis",
+    "href": "posts/ord_lab_q.html#ordinal-analysis",
+    "title": "Ordinal Regression Lab Answers",
+    "section": "Ordinal Analysis",
+    "text": "Ordinal Analysis\n\nIf you haven’t already, convert the outcome variable to an ordered factor. What does the order here represent?\n\nOrder is inverse where 1 is better than 2 which is better than 3\n\n\nCode\ngbbo_filter$Technical.Rank &lt;- factor(gbbo_filter$Technical.Rank, levels = c(\"3\", \"2\", \"1\"), ordered = TRUE) \n\n\n\nConvert input variables to categorical factors as appropriate.\n\n\nCode\nstr(gbbo_filter)\n\n\n'data.frame':   309 obs. of  3 variables:\n $ Gender        : chr  \"F\" \"M\" \"M\" \"F\" ...\n $ Age           : int  30 31 24 45 25 37 24 37 31 24 ...\n $ Technical.Rank: Ord.factor w/ 3 levels \"3\"&lt;\"2\"&lt;\"1\": 2 1 3 2 3 1 3 1 2 1 ...\n\n\nRun a ordinal logistic regression model against all relevant input variables. Interpret the effects for Gender, Age and Gender*Age (even if they are non-significant).\n\n\nCode\nm &lt;- MASS::polr(Technical.Rank ~ Gender + Age + Gender*Age, data = gbbo_filter, Hess=TRUE)\n\n## view a summary of the model\nm %&gt;% \n  tidy()\n\n\n# A tibble: 5 × 5\n  term        estimate std.error statistic coef.type  \n  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;      \n1 GenderM      1.15       0.673     1.71   coefficient\n2 Age          0.0231     0.0125    1.85   coefficient\n3 GenderM:Age -0.0388     0.0185   -2.09   coefficient\n4 3|2         -0.00495    0.452    -0.0109 scale      \n5 2|1          1.42       0.460     3.08   scale      \n\n\nTest if the interaction is warranted\n\n#Hint: You need to create two models with clm(); one with interaction and one without. #Then you compare them using the anova test using anova()\n\nUse ggemmeans to create a figure showing the interaction between Gender and Age as a function of rank. Plot predicted probabilities from the model.\n\n\nLatent Visualization\n\n\nCode\nols_clm = MASS::polr(Technical.Rank~Gender*Age, data=gbbo_filter)\n\n\nggeffect(ols_clm, c(\"Age[all]\", \"Gender\"), latent=TRUE) %&gt;% plot()\n\n\n\n\n\n\n\n\n\n\nUse the Brant test to support or reject the hypothesis that the proportional odds assumption holds for your simplified model.\n\n\nCode\nbrant.test(ols_clm)\n\n\n\nBrant Test:\n               chi-sq   df   pr(&gt;chi)\nOmnibus         1.295    3       0.73\nGenderM         0.585    1       0.44\nAge             0.065    1       0.80\nGenderM:Age     0.924    1       0.34\n\nH0: Proportional odds assumption holds\n\n\nbrms\nBelow is a model implementation using the brms package. We will just use the default priors for this. The exercise is to run this code and note your observations. What are salient differences you observe in how the model fitting takes place With respect to the results, how do you compare the results of the model you fit with clm and the one you fit with brms?\n\n\n\nCode\n  ols2_brm = brm(Technical.Rank ~  Gender*Age, data=gbbo_filter, family = cumulative, cores = 4,chains = 4)\n\n\n\nThe conditional_effects function is used to plot predicted probabilities by Gender and Age across each rank.\n\n\nCode\nconditional_effects(ols2_brm, categorical = T)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ncheck_predictions from the easystats performance package is used for examining model fit (i.e., does the data fit the model being used?). Run the below code. What do you think?\n\n\n\nCode\ncheck_predictions(ols2_brm)"
   }
 ]
