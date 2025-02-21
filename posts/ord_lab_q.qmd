@@ -114,9 +114,11 @@ gbbo_age <- gbbo_filter %>%
   mutate(percentage = count / sum(count) * 100)
 
 # Plot for Age
-ggplot(gbbo_age, aes(x = Age, y = percentage, fill = Technical.Rank)) +
-  geom_histogram(stat = "identity") +
-  labs(title = "Percentage of Bakers by Rank and Age",
+
+ggplot(gbbo_age, aes(x = Age, y = percentage)) +
+  geom_bar(stat = "identity") +
+  facet_grid(. ~ Technical.Rank) + 
+    labs(title = "Percentage of Bakers by Rank and Age",
        x = "Age",
        y = "Percentage")
 
@@ -133,8 +135,9 @@ gbbo_filter <- gbbo_filter %>%
 -   Convert input variables to categorical factors as appropriate (done in code above)
 
     ```{r}
-
-    ## done in code above
+    gbbo_filter <- gbbo_filter %>% 
+        mutate(Technical.Rank = factor(Technical.Rank, levels = c(1, 2, 3), ordered = TRUE),
+               Gender = factor(Gender))
 
     ```
 
@@ -150,16 +153,18 @@ gbbo_filter <- gbbo_filter %>%
       tidy()
     ```
 
--   Test if the interaction is warranted
+-   Test if the interaction is warranted:
+
+**Interaction is indeed warranted (results from ANOVA significant)**
 
 #Hint: You need to create two models with clm(); one with interaction and one without.
 #Then you compare them using the anova test using anova()
 
 ```{r}
 
-m <- clm(Technical.Rank ~ Gender * Age, data = gbbo_filter)
+m <- clm(Technical.Rank ~ Gender * Age, data = gbbo_filter, link = "logit")
 
-m0 <- clm(Technical.Rank ~ Gender + Age, data = gbbo_filter)
+m0 <- clm(Technical.Rank ~ Gender + Age, data = gbbo_filter, link = "logit")
 
 # Compare the two models using ANOVA
 comparing <- anova(m, m0)
@@ -171,7 +176,17 @@ comparing %>%
     Plot predicted probabilities from the model.
 
     ```{r}
+    interact <- ggemmeans(m, terms = c("Age", "Gender"), type = "fixed")
+    interact
 
+    ggplot(interact,
+           aes(x = x, y = predicted, color = group, fill = group)) +
+      geom_line() +
+      geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.5) +
+      facet_wrap(~response.level) +
+      labs(title = "Predicted probabilities from the interaction model",
+           x = "Age",
+           y = "Percentage")
     ```
 
 ### Latent Visualization
@@ -187,28 +202,34 @@ ggeffect(ols_clm, c("Age[all]", "Gender"), latent=TRUE) %>% plot()
 
 -   Use the Brant test to support or reject the hypothesis that the proportional odds assumption holds for your simplified model.
 
-    ```{r}
-    brant.test(ols_clm)
+**It does indeed hold**
 
-    ```
+```{r}
+brant.test(ols_clm)
 
-    ## `brms`
+```
+
+## `brms`
 
 -   Below is a model implementation using the `brms` package.
     We will just use the default priors for this.
     The exercise is to run this code and note your observations.
     What are salient differences you observe in how the model fitting takes place With respect to the results, how do you compare the results of the model you fit with `clm` and the one you fit with `brms`?
 
+**The results of the brm and clm model are near identical with respect to the estimate coefficients**
+
 ```{r}
 #| results: hide
 #| 
   ols2_brm = brm(Technical.Rank ~  Gender*Age, data=gbbo_filter, family = cumulative, cores = 4,chains = 4)
+  
+  ols2_brm
 ```
 
 -   The `conditional_effects` function is used to plot predicted probabilities by Gender and Age across each rank.
 
     ```{r}
-    conditional_effects(ols2_brm, categorical = T)
+    conditional_effects(ols2_brm, conditions = T)
     ```
 
 -   `check_predictions` from the `easystats` `performance` package is used for examining model fit (i.e., does the data fit the model being used?).
