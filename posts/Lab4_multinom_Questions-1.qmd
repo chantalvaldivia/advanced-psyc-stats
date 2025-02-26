@@ -1,7 +1,7 @@
 ---
     title: "Lab 4 - Multinomial Regression - Questions"
-    author:
-      - name: Suyog Chandramouli
+    author: 
+      - name: Chantal Valdivia-Moreno
     date: last-modified
     format:
       html:
@@ -97,7 +97,7 @@ library(easystats)
 
 ```{r}
 
-voter_data <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/non-voters/nonvoters_data.csv")
+voter_data <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/non-voters/nonvoters_data.csv")
 ```
 
 # Lab
@@ -107,20 +107,23 @@ voter_data <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/m
 ```{r}
 voter_data <- voter_data %>%
   mutate(pol_ident_new = case_when(
-    Q30==1 ~ "Rep", 
-    Q30==2 ~ "Dem", 
-    Q30==3 ~ "Indep", 
+    Q30==1 ~ "Republican", 
+    Q30==2 ~ "Democrat", 
+    Q30==3 ~ "Independent", 
     TRUE ~ "Other"
   ))
 
-
-
+voter_data$pol_ident_new
 ```
 
 -   The variable `voter_category` identifies the respondent's past voter behavior. Relevel the variable to make rarely/never the baseline level, followed by sporadic, then always
 
 ```{r}
 #Enter your code
+voter_data$voter_category
+
+voter_data$voter_category <- ordered(voter_data$voter_category, levels=c("rarely/never", "sporadic", "always"))
+
 
 ```
 
@@ -129,6 +132,7 @@ That is, so that it reflects the log-odds for an average-aged person rather than
 ```{r}
 # enter code 
 
+voter_data$center_age <- voter_data$ppage - mean(voter_data$ppage)
 
 ```
 
@@ -139,22 +143,34 @@ That is, so that it reflects the log-odds for an average-aged person rather than
 library(ggplot2)
 library(viridis)
 library(cowplot)
+    library(ggchicklet)
+    library(ggtext)
+    library(dplyr)
+    library(forcats)
+    library(grid)
 
 # Enter code
-#plot_race<- ggplot(..)
+plot_race <- ggplot(voter_data, aes(x = race, y = voter_category))+
+  geom_col(aes(fill = voter_category), width = 0.7) 
+
+plot_race + coord_flip()
 
 ```
 
 ```{r}
 # Enter code
-#plot_voter_cat<- ggplot(..)
+plot_gender <- ggplot(voter_data, aes(x = gender, y = voter_category))+
+  geom_col(aes(fill = voter_category), width = 0.7) 
+
+plot_gender + coord_flip()
 
 ```
 
 The plots can be combined into a single plot using the patchwork package.
 ```{r}
 library(patchwork)
-# Enter code
+
+plot_gender + plot_race
 
 ```
 
@@ -165,7 +181,7 @@ library(patchwork)
     library(nnet)
     
     #Enter code
-
+model <- multinom(voter_category ~ center_age + race + gender + income_cat + educ, data = voter_data)
 
 ```
 
@@ -174,21 +190,27 @@ library(patchwork)
 
 ```{r}
 #Enter code
+
+model <- multinom(voter_category ~ center_age + race + gender + income_cat + educ, data = voter_data)
+
+model_party <- multinom(voter_category ~ center_age + race + gender + income_cat + educ + pol_ident_new, data = voter_data)
+
+# Compare the two models using ANOVA
+comparing <- anova(model, model_party)
+comparing %>%
+  kable()
+
+
 ```
 
     > #Enter answer based on your code: ____________
+Model party is the best
 
 **Use the model you select for the remainder of the assignment**.
 
 ## LRT 
 
 -   Run the full model and report overall significance of each of the terms
-
-    ```{r}
-
-
-    ```
-
 
 
 ## Marginal Effects Political Group - Emmeans
@@ -197,14 +219,14 @@ library(patchwork)
 #Get estimated marginal means from the model
 
 #using 
-#multinomial_analysis <- emmeans(model, ~ pol|voter_category)
+multinomial_analysis <- emmeans(model_party, ~ pol_ident_new|voter_category)
 
 
-#coefs = contrast(regrid(multi_an, "log"),"trt.vs.ctrl1",  by="pol")
+coefs = contrast(regrid(multinomial_analysis, "log"),"trt.vs.ctrl1",  by="pol_ident_new")
 # you can add a parameter to the above command, ref = newbaseline, if you want to change baseline
 
-#update(coefs, by = "contrast") %>% 
-#  kable(format = "markdown", digits = 3)
+update(coefs, by = "contrast") %>% 
+  kable(format = "markdown", digits = 3)
 ```
 
 
@@ -243,7 +265,6 @@ Plot predicted probabilities as a function of education and voting frequency.
 
     ```
 
-    ## Write-up
 
 ### Differences between political groups and voting behavior - Emmeans
 
