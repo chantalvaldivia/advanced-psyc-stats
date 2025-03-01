@@ -43,9 +43,7 @@
       message: false
 ---
 
-Lab Goal: Predict voting frequency using demographic variables
-Data source: FiveThirtyEight "Why Many Americans Don't Vote" survey
-Method: Multinomial logistic regression
+Lab Goal: Predict voting frequency using demographic variables Data source: FiveThirtyEight "Why Many Americans Don't Vote" survey Method: Multinomial logistic regression
 
 ## Data
 
@@ -113,7 +111,7 @@ voter_data <- voter_data %>%
     TRUE ~ "Other"
   ))
 
-voter_data$pol_ident_new
+#voter_data$pol_ident_new
 ```
 
 -   The variable `voter_category` identifies the respondent's past voter behavior. Relevel the variable to make rarely/never the baseline level, followed by sporadic, then always
@@ -122,13 +120,14 @@ voter_data$pol_ident_new
 #Enter your code
 voter_data$voter_category
 
-voter_data$voter_category <- ordered(voter_data$voter_category, levels=c("rarely/never", "sporadic", "always"))
+voter_data <- voter_data %>%
+  mutate(voter_category = fct_relevel(voter_category, "rarely/never", "sporadic", "always"))
 
 
 ```
 
-- Center the age variable to make the intercept more interepretable. 
-That is, so that it reflects the log-odds for an average-aged person rather than a 0-year old person
+-   Center the age variable to make the intercept more interepretable. That is, so that it reflects the log-odds for an average-aged person rather than a 0-year old person
+
 ```{r}
 # enter code 
 
@@ -143,34 +142,54 @@ voter_data$center_age <- voter_data$ppage - mean(voter_data$ppage)
 library(ggplot2)
 library(viridis)
 library(cowplot)
-    library(ggchicklet)
+    #library(ggchicklet)
     library(ggtext)
     library(dplyr)
     library(forcats)
     library(grid)
 
 # Enter code
-plot_race <- ggplot(voter_data, aes(x = race, y = voter_category))+
-  geom_col(aes(fill = voter_category), width = 0.7) 
+race_vote = voter_data %>%
+  count(race, voter_category) %>%
+  group_by(race) %>%
+  mutate(prop = n / sum(n)) %>%
+  ggplot( aes(x = race, y = prop))+
+  geom_col(aes(fill = voter_category), width = 0.7) + coord_flip()+
+  labs(title = "Voter Category by Race")
 
-plot_race + coord_flip()
+race_vote
 
 ```
+
+It seems like Hispanic folks are least likely to "always" vote.
+
+"Other/Mixed" folks are most likely to rarely/never vote (although they could have just not answered the race question)
+
+White folks are mostly likely to "always" vote, closely followed by Black folk
 
 ```{r}
 # Enter code
-plot_gender <- ggplot(voter_data, aes(x = gender, y = voter_category))+
-  geom_col(aes(fill = voter_category), width = 0.7) 
 
-plot_gender + coord_flip()
+gender_vote = voter_data %>%
+  count(gender, voter_category) %>%
+  group_by(gender) %>%
+  mutate(prop = n / sum(n)) %>%
+  ggplot( aes(x = gender, y = prop))+
+  geom_col(aes(fill = voter_category), width = 0.7) + coord_flip()+
+  labs(title = "Voter Category by Gender")
+
+gender_vote
 
 ```
 
+Women are most likely to always vote. Nearly \~50% of both men and women only sporadically vote.
+
 The plots can be combined into a single plot using the patchwork package.
+
 ```{r}
 library(patchwork)
 
-plot_gender + plot_race
+gender_vote + race_vote + plot_layout(ncol = 2)
 
 ```
 
@@ -186,7 +205,7 @@ model <- multinom(voter_category ~ center_age + race + gender + income_cat + edu
 ```
 
 -   *Should party identification be added to the model?*
-- #Hint: Use an anova test to make the determination
+-   #Hint: Use an anova test to make the determination
 
 ```{r}
 #Enter code
@@ -203,15 +222,28 @@ comparing %>%
 
 ```
 
-    > #Enter answer based on your code: ____________
-Model party is the best
+> #Enter answer based on your code: \_\_\_\_\_\_\_\_\_\_\_\_
+
+**Model party provides the best fit**
 
 **Use the model you select for the remainder of the assignment**.
 
-## LRT 
+## LRT
 
--   Run the full model and report overall significance of each of the terms
+```{r}
+car::Anova(model_party) %>% 
+  kable()
 
+```
+
+-   Run the full model and report overall significance of each of the terms.
+
+**Each of the terms are p \< .001 (very, very close to 0)**
+
+```{r}
+model_party %>%
+  tidy()
+```
 
 ## Marginal Effects Political Group - Emmeans
 
@@ -221,7 +253,6 @@ Model party is the best
 #using 
 multinomial_analysis <- emmeans(model_party, ~ pol_ident_new|voter_category)
 
-
 coefs = contrast(regrid(multinomial_analysis, "log"),"trt.vs.ctrl1",  by="pol_ident_new")
 # you can add a parameter to the above command, ref = newbaseline, if you want to change baseline
 
@@ -229,49 +260,81 @@ update(coefs, by = "contrast") %>%
   kable(format = "markdown", digits = 3)
 ```
 
-
 ## Marginal Effects of Education - Emmeans
 
 ```{r}
 
 #Enter code
+#using 
+multinomial_analysis <- emmeans(model_party, ~ educ|voter_category)
+
+coefs = contrast(regrid(multinomial_analysis, "log"),"trt.vs.ctrl1",  by="educ")
+# you can add a parameter to the above command, ref = newbaseline, if you want to change baseline
+
+update(coefs, by = "contrast") %>% 
+  kable(format = "markdown", digits = 3)
 
 ```
 
-- Next, plot the predicted probabilities of voter category as a function of Age and Party ID
+-   Next, plot the predicted probabilities of voter category as a function of Age and Party ID
 
-    ```{r}
-  ggemmeans(mm_use, terms = c("ppage")) %>% 
-      ggplot(., aes(x = x, y = predicted, fill = response.level)) +
-      geom_area() + 
-      geom_rug(sides = "b", position = "jitter", alpha = .5) + 
-      labs(x = "\nAge", y = "Predicted Probablity\n", title = "Predicted Probabilities of Voting Frequency by Age") +
-      scale_fill_manual(
-        name = NULL,
-        values = c("always" = "#F6B533", "sporadic" = "#D07EA2", "rarely/never" = "#9854F7"),
-        labels = c("RARELY OR NEVER VOTE    ", "SOMETIMES VOTE    ", "ALMOST ALWAYS VOTE    "),
-        breaks = c("rarely/never", "sporadic", "always")
-      ) +
-      theme_minimal()
+```{r}
+
+predictions <- ggemmeans(model_party, terms = c("center_age", "pol_ident_new"))
+
+# Create the plot with facets for each party ID category.
+ggplot(predictions, aes(x = x, y = predicted, fill = response.level)) +
+  geom_area() +
+  geom_rug(sides = "b", position = "jitter", alpha = 0.5) +
+  labs(
+    x = "\nAge",
+    y = "Predicted Probability\n",
+    title = "Predicted Probabilities of Voting Frequency by Age and Party ID"
+  ) +
+  facet_wrap(~ group, labeller = label_both) +  # Facet by Party ID
+  scale_fill_manual(
+    name = NULL,
+    values = c("always" = "#F6B533", "sporadic" = "#D07EA2", "rarely/never" = "#9854F7"),
+    labels = c("RARELY OR NEVER VOTE", "SOMETIMES VOTE", "ALMOST ALWAYS VOTE"),
+    breaks = c("rarely/never", "sporadic", "always")
+  )
 ```
 
-Plot predicted probabilities as a function of education and voting frequency. 
-    ```{r}
+**Republicans are least likely to rarely/never vote.**
 
+Plot predicted probabilities as a function of education and voting frequency.
 
-    ```
+```{r}
 
-    ```{r}
+predictions <- ggemmeans(model_party, terms = c("center_age", "educ"))
 
-    ```
+# Create the plot with facets for each party ID category.
+ggplot(predictions, aes(x = x, y = predicted, fill = response.level)) +
+  geom_area() +
+  geom_rug(sides = "b", position = "jitter", alpha = 0.5) +
+  labs(
+    x = "\nEducation",
+    y = "Predicted Probability\n",
+    title = "Predicted Probabilities of Voting Frequency by Education and Party ID"
+  ) +
+  facet_wrap(~ group, labeller = label_both) +  # Facet by Party ID
+  scale_fill_manual(
+    name = NULL,
+    values = c("always" = "#F6B533", "sporadic" = "#D07EA2", "rarely/never" = "#9854F7"),
+    labels = c("RARELY OR NEVER VOTE", "SOMETIMES VOTE", "ALMOST ALWAYS VOTE"),
+    breaks = c("rarely/never", "sporadic", "always")
+  )
 
+```
+
+**Thoe with only a high school education or less are less likely to consistenly engage with voting vbehaviors, as they are most likely to "rarely or never vote," and least likely to "almost alway vote"**
 
 ### Differences between political groups and voting behavior - Emmeans
 
 ```{r}
-multi_an <- emmeans(mm_use, ~ pol|voter_category)
+multi_an <- emmeans(model_party, ~ pol_ident_new|voter_category)
 
-coefs = contrast(regrid(multi_an, "log"),"trt.vs.ctrl1",  by="pol")
+coefs = contrast(regrid(multi_an, "log"),"trt.vs.ctrl1",  by="pol_ident_new")
 
 update(coefs, by = "contrast") %>% 
   kable(format = "markdown", digits = 3)
@@ -287,7 +350,7 @@ contrast(coefs, "revpairwise", by = "contrast") %>%
 Last part of the assignment: Interpret the results from running the following code for your model
 
 ```{r}
-multi_an <- emmeans(model, ~ educ|voter_category)
+multi_an <- emmeans(model_party, ~ educ|voter_category)
 
 coefs = contrast(regrid(multi_an, "log"),"trt.vs.ctrl1",  by="educ")
 
@@ -299,5 +362,6 @@ contrast(coefs, "revpairwise", by = "contrast") %>%
   kable(format = "markdown", digits = 3)
 ```
 
-Enter your interpretation here: ____
+Enter your interpretation here:
 
+Generally, the more education one has the more likely one is to vote and to do so consistently
