@@ -1,6 +1,4 @@
 ---
-
----
 title: "Lab 5 - Poisson - Questions"
 author:
     date: last-modified
@@ -205,69 +203,74 @@ check_model(new_model,plot = T)
 
 What do you notice? And what's a good next step forward? Can there be another model class that can fit the data? If so, fit this model to the data.
 
-I notice that we no longer have an outlier problem, but we do have an overdispersion problem.
+I notice that we no longer have an outlier problem, but we do have an overdispersion problem. The next step would proably use a negative binomial regression model.
 
 ```{r}
 check_overdispersion(new_model)
 ```
 
+```{r}
+  binom_model <- glm.nb(wwwhr ~ wordsum + age + sex + reliten_recode + polviews + wrkhome, data = data_pos_filtered)
+
+summary(binom_model)
+model_parameters(binom_model) %>%
+  print_html()
+```
+
 ## Which one is better- your earlier model, or later model?
 
-```{r}
+The negative binomial model (so the later model) has a much lower AIC, so we can conclude the model fits the data better than the poisson
 
+```{r}
+test_likelihoodratio(new_model, binom_model)
+AIC(new_model, binom_model)
 ```
 
 ## What is zero inflation? Is there zero-inflation in your chosen model?
 
+When there are too many zeros in your data, that can bias your result. There is indeed zero inflation in my chosen model.
+
 ```{r}
+performance::check_zeroinflation(binom_model)
 
 ```
 
 ::: panel-tabset
+
 ## Log Lambda
 
 ```{r}
+lambda_poisson <- predict(new_model, type = "response")
+lambda_negbinom <- predict(binom_model, type = "response")
 
+# Log transform the lambda values
+log_lambda_poisson <- log(lambda_poisson)
+log_lambda_negbinom <- log(lambda_negbinom)
+
+# Output the log lambda values for a subset of the data
+head(data.frame(log_lambda_poisson, log_lambda_negbinom))
 
 ```
 
 ## Mean Count
 
 ```{r}
+predicted_counts_poisson <- predict(new_model, type = "response")
+predicted_counts_negbinom <- predict(binom_model, type = "response")
+
+# Calculate the mean of predicted counts for each model
+mean_count_poisson <- mean(predicted_counts_poisson, na.rm = TRUE)
+mean_count_negbinom <- mean(predicted_counts_negbinom, na.rm = TRUE)
+
+# Output the mean counts
+mean_count_poisson
+mean_count_negbinom
 
 ```
 :::
 
 ## Report your conclusions
 
-We fitted a poisson mixed model
+It seems like the negative binomial model outputs slightly higher mean counts and log lambdas than the poisson distribution. It seems like we should favor the negative binomial outputs over the poisson.
 
-to predict Number_of_fixations with emotion and Group (formula:
-
-Number_of_fixations \~ emotion \* Group). The model's total explanatory power is moderate
-
-(conditional R2 = 0.13) and the part related to the fixed effects alone
-
-(marginal R2) is of 0.02. The model's intercept, corresponding to emotion = 0
-
-and Group = 0, is at 1.35 (95% CI \[1.28, 1.42\], p \< .001). Within this model:
-
- - The effect of emotion is statistically significant and negative (beta =
-
--0.09, 95% CI \[-0.16, -0.03\], p = 0.003; Std. beta = -0.04, 95% CI \[-0.08,
-
--0.01\])
-
- - The effect of Group is statistically non-significant and positive (beta =
-
-0.09, 95% CI \[-0.05, 0.23\], p = 0.202; Std. beta = 0.04, 95% CI \[-0.02, 0.11\])
-
- - The effect of emotion × Group is statistically significant and positive (beta
-
-= 0.15, 95% CI \[0.02, 0.27\], p = 0.023; Std. beta = 0.04, 95% CI \[5.19e-03,
-
-0.07\])
-
-Standardized parameters were obtained by fitting the model on a standardized
-
-version of the dataset. 95% Confidence Intervals (CI
+We initally fitted a poisson model to predict the number of hours per week that a person spends on the Internet ("WWWHR") using their vocabulary ("WORDSUM"), age ("AGE"), sex ("SEX"), religiosity ("RELITEN"), political orientation ("POLVIEWS"), and how often they work from home ("WRKHOME") as fixed effects. We then fit a negative binomial model instead because there were too many outliers, in this model, only the effects of wordsum, age, and religiosity (linear) were significant but not those of sex, polviews, or working from home.
