@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "advanced-psyc-stats",
     "section": "",
-    "text": "Lab 5 - Poisson - Questions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLab: Logistic Regression\n\n\nPrinceton University\n\n\n\n\n\n\n\n\nChantal Valdivia-Moreno\n\n\n\n\n\n\n\n\n\n\n\n\nOrdinal Regression Lab Answers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLab 4 - Multinomial Regression - Questions\n\n\n\n\n\n\n\n\n\n\n\nMar 1, 2025\n\n\nChantal Valdivia-Moreno\n\n\n\n\n\n\nNo matching items"
+    "text": "Lab 5 - Poisson - Questions\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLab: Logistic Regression\n\n\nPrinceton University\n\n\n\n\n\n\n\n\nChantal Valdivia-Moreno\n\n\n\n\n\n\n\n\n\n\n\n\nIntro to MLM Exercise/Walkthrough\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nOrdinal Regression Lab Answers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLab 4 - Multinomial Regression - Questions\n\n\n\n\n\n\n\n\n\n\n\nMar 1, 2025\n\n\nChantal Valdivia-Moreno\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/Lab-Logistic-Q.html",
@@ -271,5 +271,19 @@
     "title": "Lab 5 - Poisson - Questions",
     "section": "Report your conclusions",
     "text": "Report your conclusions\nIt seems like the negative binomial model outputs slightly higher mean counts and log lambdas than the poisson distribution. It seems like we should favor the negative binomial outputs over the poisson.\nWe initally fitted a poisson model to predict the number of hours per week that a person spends on the Internet (“WWWHR”) using their vocabulary (“WORDSUM”), age (“AGE”), sex (“SEX”), religiosity (“RELITEN”), political orientation (“POLVIEWS”), and how often they work from home (“WRKHOME”) as fixed effects. We then fit a negative binomial model instead because there were too many outliers, in this model, only the effects of wordsum, age, and religiosity (linear) were significant but not those of sex, polviews, or working from home."
+  },
+  {
+    "objectID": "posts/MLM_Intro_Questions.html",
+    "href": "posts/MLM_Intro_Questions.html",
+    "title": "Intro to MLM Exercise/Walkthrough",
+    "section": "",
+    "text": "New Packages!\n\n\n\n\n\nThese are the main packages we’re going to use in this block. It might make sense to install them now if you do not have them already\n\ntidyverse : for organising data\n\nlme4 : for fitting generalised linear mixed effects models\nbroom.mixed : tidying methods for mixed models\neffects : for tabulating and graphing effects in linear models\nlmerTest: for quick p-values from mixed models\nparameters: various inferential methods for mixed models"
+  },
+  {
+    "objectID": "posts/MLM_Intro_Questions.html#footnotes",
+    "href": "posts/MLM_Intro_Questions.html#footnotes",
+    "title": "Intro to MLM Exercise/Walkthrough",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nImage sources:http://tophatsasquatch.com/2012-tmnt-classics-action-figures/https://www.dezeen.com/2016/02/01/barbie-dolls-fashionista-collection-mattel-new-body-types/https://www.wish.com/product/5da9bc544ab36314cfa7f70chttps://www.worldwideshoppingmall.co.uk/toys/jumbo-farm-animals.asphttps://www.overstock.com/Sports-Toys/NJ-Croce-Scooby-Doo-5pc.-Bendable-Figure-Set-with-Scooby-Doo-Shaggy-Daphne-Velma-and-Fred/28534567/product.htmlhttps://tvtropes.org/pmwiki/pmwiki.php/Toys/Furbyhttps://www.fun.com/toy-story-4-figure-4-pack.htmlhttps://www.johnlewis.com/lego-minifigures-71027-series-20-pack/p5079461↩︎"
   }
 ]

@@ -236,7 +236,6 @@ performance::check_zeroinflation(binom_model)
 ```
 
 ::: panel-tabset
-
 ## Log Lambda
 
 ```{r}
