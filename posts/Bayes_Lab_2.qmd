@@ -83,7 +83,7 @@ In many respect, it's distributions 'all the way down,' with Bayesians. This can
 Hint 1: Many of these terms were in the Bayes Rule.
 :::
 
-### Answer: 
+### Answer:
 
 > -   the likelihood distributions = P (d \| theta)
 > -   the prior parameter distribution (aka priors) = P (theta)
@@ -694,7 +694,7 @@ summary(fit2.b)
 
 ## QUESTION 2 Are the priors the same? What do you think is going on?
 
-### Answer: 
+### Answer:
 
 > The differences between the priors are quite minimal and probably it's just natural variation from sampling?
 >
