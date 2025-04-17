@@ -2,7 +2,6 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/Bayes_Lab_3_1_Priors-and-predictive-checks.html",
       "/posts/poisson_lab_questions-1.html",
       "/posts/Bayes_Lab_1.html",
       "/posts/Bayes_Lab_2.html",
@@ -11,7 +10,6 @@
       "/posts/MLM_Intro_Questions.html",
       "/posts/Bayes_Lab_3_1_Priors and predictive checks.html",
       "/posts/ord_lab_q.html",
-      "/posts/Bayes_Lab_3_1_Priors and predictive checks.html",
       "/posts/Lab4_multinom_Questions-1.html"
     ]
   }
